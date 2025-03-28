@@ -6,12 +6,10 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rb;
     public Animator animator;
     public CharacterStats characterStats;
-    
-    [Foldout("Movement Module", foldEverything = true, styled = true, readOnly = true)]
-    public float inputMagnitude;
-    public bool isControlsActive = true;
+    [DisplayWithoutEdit()] public bool isControlsActive = true;
 
     private Vector3 _moveVector;
+    private float _inputMagnitude;
 
     private void FixedUpdate()
     {
@@ -22,7 +20,7 @@ public class PlayerController : MonoBehaviour
     {
         if(!isControlsActive)
         {
-            inputMagnitude = 0;
+            _inputMagnitude = 0;
             animator.SetBool("isWalking", false);
             animator.SetFloat("movementSpeed", 0);
             return;
@@ -43,17 +41,17 @@ public class PlayerController : MonoBehaviour
             inputDirection.Normalize();
         }
 
-        _moveVector = inputDirection * characterStats.moveSpeed.Value * Time.deltaTime;
+        _moveVector = inputDirection * (characterStats.moveSpeed.Value * Time.deltaTime);
 
         if (inputDirection.magnitude > 0)
         {
-            inputMagnitude = inputDirection.magnitude;
+            _inputMagnitude = inputDirection.magnitude;
 
             Vector3 movementDirection = Vector3.RotateTowards(rb.transform.forward, _moveVector, characterStats.rotateSpeed.Value * Time.deltaTime, 0.0f);
             rb.transform.rotation = Quaternion.LookRotation(movementDirection);
 
             animator.SetBool("isWalking", true);
-            animator.SetFloat("movementSpeed", inputMagnitude);
+            animator.SetFloat("movementSpeed", _inputMagnitude);
         }
         else
         {

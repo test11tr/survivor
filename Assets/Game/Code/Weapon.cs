@@ -10,59 +10,80 @@ public enum BulletEffectType
 
 public class Weapon : MonoBehaviour
 {
-    public BulletEffectType bulletEffectType;
-    public float baseFireRate = 1f;
-    public float baseDamage = 10f;
-    public float baseProjectileCount = 1f;
+    [Header("ScriptableObject")]
+    public WeaponDataSO weaponData;
 
-    private CharacterStats _characterStats;
+    [Header("References")]
+    public CharacterStats characterStats; // Karakterin statlarını tutmak için
+    
     private float _fireTimer;
-
-    // Silah aktif mi, pasif mi
-    public bool isActive = true;
+    private bool _isActive;
 
     private void Start()
     {
-        // Bulabildiğin bir yerden CharacterStats al
-        // Örneğin parent objede duruyorsa:
-        _characterStats = GetComponentInParent<CharacterStats>();
-        // ya da bir manager varsa oradan da referans alabilirsin
+        // weaponData'daki default ayarı al
+        _isActive = weaponData != null && weaponData.isActiveByDefault;
+
+        // Eğer CharacterStats bu objenin parent’ında veya 
+        // yukarıdaki bir manager’da ise oradan alabilirsin:
+        if (characterStats == null)
+        {
+            characterStats = GetComponentInParent<CharacterStats>();
+        }
     }
 
     private void Update()
     {
-        if (!isActive) return;
+        // Eğer silah aktif değilse ateşleme
+        if (!_isActive) return;
 
         _fireTimer -= Time.deltaTime;
         if (_fireTimer <= 0f)
         {
             FireWeapon();
-            // Karakterin fireRate statını da hesaba kat
-            float totalFireRate = baseFireRate * (1 + _characterStats.fireRate.Value / 100f);
-            _fireTimer = 1f / totalFireRate; 
+            float totalFireRate = (weaponData.baseFireRate + characterStats.fireRate.Value);
+            // Örneğin: 1 / totalFireRate 
+            // (burada tam formülünü dilediğin gibi ayarla)
+            _fireTimer = 1f / totalFireRate;
         }
     }
 
     private void FireWeapon()
     {
-        // Projeyi ayır: Kaç mermi? Hangi açılarla?
-        int projectileCount = Mathf.RoundToInt(baseProjectileCount + _characterStats.projectileCount.Value);
+        // Kaç mermi? (WeaponData + CharacterStats’tan gelen)
+        int projectileCount = Mathf.RoundToInt(weaponData.baseProjectileCount + characterStats.projectileCount.Value);
 
         for (int i = 0; i < projectileCount; i++)
         {
-            // Mermiyi instantiate et.
-            // Projectile açısını ayarla. 
-            // Örnek:
-            Vector3 spawnPos = transform.position; // Silahın konumu etrafında
-            Quaternion spawnRot = Quaternion.Euler(0f, (i - projectileCount/2f) * _characterStats.projectileAngle.Value, 0f);
+            float angleStep = weaponData.baseProjectileAngle + characterStats.projectileAngle.Value;
+            float angleOffset = (i - (projectileCount - 1) / 2f) * angleStep;
 
-            GameObject bulletObj = Instantiate(Resources.Load<GameObject>("BulletPrefab"), spawnPos, spawnRot);
-            Bullet bullet = bulletObj.GetComponent<Bullet>();
+            // Bu silah objesinin konum/rotasyonundan spawn edelim
+            Vector3 spawnPos = transform.position;
+            Quaternion spawnRot = Quaternion.Euler(transform.eulerAngles.x,
+                                                   transform.eulerAngles.y + angleOffset,
+                                                   transform.eulerAngles.z);
 
-            // Mermiye final damage değerini geç.
-            // (Karakterin damage statı + weapon baseDamage)
-            float finalDamage = baseDamage + _characterStats.damage.Value;
-            bullet.Initialize(finalDamage, bulletEffectType);
+            // Mermi prefabini, weaponData’dan al
+            if (weaponData.bulletPrefab != null)
+            {
+                GameObject bulletObj = Instantiate(weaponData.bulletPrefab, spawnPos, spawnRot);
+                // Bullet scriptini al
+                Bullet bullet = bulletObj.GetComponent<Bullet>();
+                if (bullet != null)
+                {
+                    // Hasar hesaplama
+                    float finalDamage = weaponData.baseDamage + characterStats.damage.Value;
+                    bullet.Initialize(finalDamage, weaponData.bulletEffect, characterStats);
+                    // characterStats => Attacker stats (lifesteal vs. için)
+                }
+            }
         }
+    }
+
+    // Aktif/Pasif kontrolü
+    public void SetActive(bool value)
+    {
+        _isActive = value;
     }
 }

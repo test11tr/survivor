@@ -37,25 +37,25 @@ public class CharacterStats : MonoBehaviour
         // Eğer ScriptableObject atadıysan onunla baseValue'ları doldur
         if (baseStats != null)
         {
-            health.baseValue           = baseStats.baseHealth;
-            moveSpeed.baseValue        = baseStats.baseMoveSpeed;
-            rotateSpeed.baseValue      = baseStats.rotateSpeed;
-            fireRate.baseValue         = baseStats.baseFireRate;
-            damage.baseValue           = baseStats.baseDamage;
-            projectileCount.baseValue  = baseStats.baseProjectileCount;
+            health.baseValue = baseStats.baseHealth;
+            moveSpeed.baseValue = baseStats.baseMoveSpeed;
+            rotateSpeed.baseValue = baseStats.rotateSpeed;
+            fireRate.baseValue = baseStats.baseFireRate;
+            damage.baseValue = baseStats.baseDamage;
+            projectileCount.baseValue = baseStats.baseProjectileCount;
             projectileAngle.baseValue  = baseStats.baseProjectileAngle;
-            lifeSteal.baseValue        = baseStats.baseLifeSteal;   
+            lifeSteal.baseValue = baseStats.baseLifeSteal;
         }
 
         // Ardından runtime değerleri, baseValue’dan başlat
-        health.Value          = health.baseValue;
-        moveSpeed.Value       = moveSpeed.baseValue;
-        rotateSpeed.Value     = rotateSpeed.baseValue;
-        fireRate.Value        = fireRate.baseValue;
-        damage.Value          = damage.baseValue;
+        health.Value = health.baseValue;
+        moveSpeed.Value = moveSpeed.baseValue;
+        rotateSpeed.Value = rotateSpeed.baseValue;
+        fireRate.Value = fireRate.baseValue;
+        damage.Value = damage.baseValue;
         projectileCount.Value = projectileCount.baseValue;
         projectileAngle.Value = projectileAngle.baseValue;
-        lifeSteal.Value       = lifeSteal.baseValue;
+        lifeSteal.Value = lifeSteal.baseValue;
     }
 
     // Stat değişikliği metodu

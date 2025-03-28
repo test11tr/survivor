@@ -1,87 +1,66 @@
 using UnityEngine;
 
-public enum BulletEffectType
-{
-    None,
-    Electric,
-    Poison
-    // vs...
-}
-
 public class Weapon : MonoBehaviour
 {
     [Header("ScriptableObject")]
     public WeaponDataSO weaponData;
 
     [Header("References")]
-    public CharacterStats characterStats; // Karakterin statlarını tutmak için
-    
+    public CharacterStats characterStats;
+
     private float _fireTimer;
     private bool _isActive;
 
     private void Start()
     {
-        // weaponData'daki default ayarı al
-        _isActive = weaponData != null && weaponData.isActiveByDefault;
+        if (weaponData == null)
+        {
+            Debug.LogWarning($"{name} has no WeaponData assigned! Possibly assigned by manager at runtime.");
+        }
+        else
+        {
+            _isActive = weaponData.isActiveByDefault;
+        }
 
-        // Eğer CharacterStats bu objenin parent’ında veya 
-        // yukarıdaki bir manager’da ise oradan alabilirsin:
         if (characterStats == null)
         {
             characterStats = GetComponentInParent<CharacterStats>();
         }
     }
 
-    private void Update()
+    public void FireWeapon(Vector3 aimPoint)
     {
-        // Eğer silah aktif değilse ateşleme
-        if (!_isActive) return;
+        // 1) Silah, aimPoint'e doğru dönmek istiyorsa (opsiyonel):
+        Vector3 fixedAim = new Vector3(aimPoint.x, transform.position.y, aimPoint.z);
+        transform.LookAt(fixedAim);
 
-        _fireTimer -= Time.deltaTime;
-        if (_fireTimer <= 0f)
-        {
-            FireWeapon();
-            float totalFireRate = (weaponData.baseFireRate + characterStats.fireRate.Value);
-            // Örneğin: 1 / totalFireRate 
-            // (burada tam formülünü dilediğin gibi ayarla)
-            _fireTimer = 1f / totalFireRate;
-        }
-    }
-
-    private void FireWeapon()
-    {
-        // Kaç mermi? (WeaponData + CharacterStats’tan gelen)
+        // 2) Mermiyi spawn et
+        // (Bu kısım senin "FireWeapon" mantığınla aynı)
         int projectileCount = Mathf.RoundToInt(weaponData.baseProjectileCount + characterStats.projectileCount.Value);
+        float dmg = weaponData.baseDamage + characterStats.damage.Value;
+        float angleStep = weaponData.baseProjectileAngle + characterStats.projectileAngle.Value;
 
         for (int i = 0; i < projectileCount; i++)
         {
-            float angleStep = weaponData.baseProjectileAngle + characterStats.projectileAngle.Value;
             float angleOffset = (i - (projectileCount - 1) / 2f) * angleStep;
-
-            // Bu silah objesinin konum/rotasyonundan spawn edelim
-            Vector3 spawnPos = transform.position;
             Quaternion spawnRot = Quaternion.Euler(transform.eulerAngles.x,
-                                                   transform.eulerAngles.y + angleOffset,
-                                                   transform.eulerAngles.z);
+                transform.eulerAngles.y + angleOffset,
+                transform.eulerAngles.z);
+            Vector3 spawnPos = transform.position;
 
-            // Mermi prefabini, weaponData’dan al
             if (weaponData.bulletPrefab != null)
             {
                 GameObject bulletObj = Instantiate(weaponData.bulletPrefab, spawnPos, spawnRot);
-                // Bullet scriptini al
                 Bullet bullet = bulletObj.GetComponent<Bullet>();
                 if (bullet != null)
                 {
-                    // Hasar hesaplama
-                    float finalDamage = weaponData.baseDamage + characterStats.damage.Value;
-                    bullet.Initialize(finalDamage, weaponData.bulletEffect, characterStats);
-                    // characterStats => Attacker stats (lifesteal vs. için)
+                    bullet.Initialize(dmg, weaponData.bulletEffect, characterStats);
                 }
             }
         }
     }
 
-    // Aktif/Pasif kontrolü
+    // Silah aktif/pasif yönetimi
     public void SetActive(bool value)
     {
         _isActive = value;

@@ -11,11 +11,19 @@ public class WeaponDataSO : ScriptableObject
     public float baseProjectileAngle = 10f;
 
     [Header("Bullet Settings")]
-    public GameObject bulletPrefab;       // Mermi prefabini buraya sürükle
-    public BulletEffectType bulletEffect; // Örnek: Electric, Poison vs.
+    public GameObject bulletPrefab;       // Mermi prefabı
+    public BulletEffectType bulletEffect; // Merminin efekt tipi
+
+    [Header("Weapon Prefab")]
+    public GameObject weaponPrefab;       // Silahın kendisinin prefabı (model, vb.)
 
     [Header("Misc")]
-    public bool isActiveByDefault = true; // Eklendiğinde pasif mi, aktif mi olsun
-    
-    // İleride special stats ekleyebilirsin (ör. multiShot, piercing, vb.)
+    public bool isActiveByDefault = true;
+}
+
+public enum BulletEffectType
+{
+    None,
+    Electric,
+    Poison
 }

@@ -8,6 +8,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public DataInitializer dataInitializer;
     public DelayHelper delayHelper;
+    
+    [Foldout("Game Manager", foldEverything = true, styled = true, readOnly = true)]
+    public Player player;
 
     [Foldout("Gameplay Settings", foldEverything = true, styled = true, readOnly = false)]
     public int targetFPS;

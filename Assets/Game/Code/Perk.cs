@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewPerk", menuName = "MyGame/Perk", order = 0)]
+[CreateAssetMenu(fileName = "NewPerk", menuName = "T11/Perk", order = 0)]
 public class Perk : ScriptableObject
 {
     public string perkName;
@@ -11,7 +11,7 @@ public class Perk : ScriptableObject
     public float fireRateBonus;
     public float projectileCountBonus;
     public bool unlockNewWeapon;
-    public GameObject weaponPrefabToUnlock;
+    public WeaponDataSO weaponPrefabToUnlock;
 
     // Mesela perk uygulama metodu
     public void ApplyPerk(CharacterStats stats, WeaponManager weaponManager)
@@ -22,7 +22,7 @@ public class Perk : ScriptableObject
 
         if (unlockNewWeapon && weaponPrefabToUnlock != null)
         {
-            weaponManager.AddWeapon(weaponPrefabToUnlock);
+            weaponManager.AddWeapon(weaponPrefabToUnlock, 0);
         }
     }
 }
